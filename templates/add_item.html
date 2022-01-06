@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="content-wrapper">
+        <!-- Main content -->
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box">
+                        <h3 class="col-md-12 page-header bold-flare">
+                            Add CurrencyType
+                        </h3>
+                        <div class="box-body">
+                            <form method="post" action="" role="form" class="profile-form">
+                                <div class="box-body">
+                                    <div class="row">
+                                        <div class="col-xs-6 col-sm-4">
+                                                <!-- {% csrf_token %}
+                                                {% bootstrap_form form %} -->
+                                                <p>Item <input type = "text" name = "item" /></p>
+                                                <p>Code <input type = "integer" name = "code" /></p>
+
+                                        </div>
+                                    </div>
+                                                <div class=" pull-left">
+                                                    <input type="submit" value="Save" class="btn btn-theme">
+                                                    <a href="{{ url_for('item') }}" class="btn btn-danger">
+                                                        Cancel</a>
+                                                </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- /.row -->
+        </section>
+    </div>
+    <!-- /.content-wrapper -->
+
+{% endblock %}
