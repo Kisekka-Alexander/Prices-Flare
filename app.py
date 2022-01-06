@@ -2,8 +2,7 @@ from flask import Flask,render_template, request
 from flask.helpers import url_for
 from flask_mysqldb import MySQL
 import MySQLdb.cursors
-import os
-import json
+import os, json, datetime
 from flask_wtf import Form
 from wtforms import StringField, validators,PasswordField,SubmitField
 from flask_bootstrap import Bootstrap
@@ -34,6 +33,10 @@ def dated_url_for(endpoint, **values):
                                  endpoint, filename)
             values['q'] = int(os.stat(file_path).st_mtime)
     return url_for(endpoint, **values)
+
+def defaultconverter(o):
+  if isinstance(o, datetime.date):
+      return o.__str__()
 
 @app.route('/register', methods = ['POST', 'GET'])
 def register():
@@ -90,7 +93,7 @@ def dashboard():
     startdate=form.start_date.data
     enddate=form.end_date.data
     cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT REPLACE(FORMAT(AVG(price),0),',','') as price,DATE_FORMAT(date,'%d-%m-%y') as date FROM `tbl_prices` where DATE(date) between '2021-11-04' and '2021-11-14' group by date")
+    cursor.execute("SELECT REPLACE(FORMAT(AVG(price),0),',','') as price,DATE(date) as date FROM `tbl_prices` where DATE(date) between %s and %s group by date",(startdate,enddate))
     prices=cursor.fetchall()
     
     dates_labels=[]
@@ -113,9 +116,9 @@ def dashboard():
 
     return render_template("dashboard.html", 
     values=json.dumps(price_labels), 
-    labels=json.dumps(dates_labels),
+    labels=json.dumps(dates_labels, default = defaultconverter),
     y=json.dumps(price_labels),
-    x=json.dumps(dates_labels),
+    x=json.dumps(dates_labels, default = defaultconverter),
     count=json.dumps(count_label),
     item=json.dumps(item_label), form=form)
     
