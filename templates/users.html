@@ -15,9 +15,9 @@
                              </h3>
                              <div class="pull-left btn-toolbar">
                                  <div class="btn-group">
-                                     <a href="#"
+                                     <a href="{{ url_for('register')}}"
                                         class="btn btn-default btn-md"
-                                        role="button"><span class="glyphicon glyphicon-plus"></span> Add Item</a>
+                                        role="button"><span class="glyphicon glyphicon-plus"></span> Add User</a>
                                  </div>
                                  <div class="btn-group" role="group">
                                      <button type="button" class="btn btn-default btn-lnk btn-md"><span
@@ -37,15 +37,17 @@
                                  <thead>
                                      <tr>
                                          <th>No.</th>
-                                         <th>Items</th>
+                                         <th>Username</th>
+                                         <th>Email</th>
                                          
                                      </tr>
                                  </thead>
                                  <tbody>
-                                     {% for item in items %}
+                                     {% for user in users %}
                                          <tr>
                                              <th scope="row">{{ loop.index }}</th>
-                                             <td><a href="#"> {{ item.Item }}</a></td>
+                                             <td> {{ user.username }} </td>
+                                             <td>{{ user.email }}</td>
                                              <!-- <td><a href="#"><i class="fa fa-trash-o" aria-hidden="true"></i></a></td> -->
                                          </tr>
                                      {% endfor %}

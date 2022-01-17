@@ -13,3 +13,7 @@ class RegistrationForm(Form):
 class DashboardParamsForm(Form):
     start_date= DateField('StartDate', format='%Y-%m-%d')
     end_date=DateField('EndDate', format='%Y-%m-%d')
+
+class LoginForm(Form):
+    username=StringField('Username',[validators.DataRequired()])
+    password=PasswordField('Password',[validators.DataRequired()])

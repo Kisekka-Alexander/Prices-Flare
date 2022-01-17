@@ -1,4 +1,4 @@
-from flask import Flask,render_template, request
+from flask import Flask,render_template, request, redirect, flash
 from flask.helpers import url_for
 from flask_mysqldb import MySQL
 import MySQLdb.cursors
@@ -7,7 +7,8 @@ from flask_wtf import Form
 from wtforms import StringField, validators,PasswordField,SubmitField
 from flask_bootstrap import Bootstrap
 from passlib.hash import sha256_crypt
-from Forms import RegistrationForm, DashboardParamsForm
+from Forms import RegistrationForm, DashboardParamsForm, LoginForm
+from werkzeug.security import generate_password_hash, check_password_hash
 # from MySQLdb import escape_string as thwwart
 
 app = Flask(__name__)
@@ -38,20 +39,47 @@ def defaultconverter(o):
   if isinstance(o, datetime.date):
       return o.__str__()
 
-@app.route('/register', methods = ['POST', 'GET'])
+@app.route('/users/add', methods = ['POST', 'GET'])
 def register():
    form=RegistrationForm(request.form)
    if request.method=='POST' and form.validate():
        username= form.username.data
        email=form.email.data
-       password= sha256_crypt.encrypt((str(form.password.data)))
+    #    password= sha256_crypt.encrypt((str(form.password.data)))
+       password=generate_password_hash(form.password.data, method='sha256')
 
        cursor = mysql.connection.cursor()
        cursor.execute(''' INSERT INTO tbl_users VALUES(%s,%s,%s,%s)''',(username,email,password,""))
        mysql.connection.commit()
        cursor.close()
        return f"Done!!"
-   return render_template("register.html",form=form)   
+   return render_template("register.html",form=form)
+
+@app.route('/login', methods=['POST','GET'])
+def login():
+    # login code goes here
+    form=LoginForm(request.form)
+    if request.method=='POST' and form.validate():
+        username = form.username.data
+        password = form.password.data
+        # remember = True if form.remember.data('remember') else False
+
+        cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT username, password FROM tbl_users where username=%s",[username])
+        users=cursor.fetchall()
+        for user in users:
+           dbusername=user.get("username")
+           dbpassword=user.get("password")
+
+    # check if the user actually exists
+    # take the user-supplied password, hash it, and compare it to the hashed password in the database
+        if username!=dbusername or not check_password_hash(dbpassword, password):
+            flash('Please check your login details and try again.')
+            return redirect(url_for('login')) # if the user doesn't exist or password is wrong, reload the page
+        return redirect(url_for('dashboard'))
+
+    # if the above check passes, then we know the user has the right credentials
+    return render_template("login.html",form=form) 
 
 @app.route('/subscribers',methods=['GET','POST'])
 def subscriber():
@@ -81,11 +109,23 @@ def item():
     #creating variable for connection
     cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     #executing query
-    cursor.execute("SELECT *,FORMAT((@row_number:=@row_number + 1),0) AS row_num  FROM tbl_items,(SELECT @row_number:=0) AS temp")
+    cursor.execute("SELECT * FROM tbl_items")
     #fetching all records from database
     data=cursor.fetchall()
     #returning back to subscriber.html with all records from MySQL which are stored in variable data
     return render_template("items.html",items=data)
+
+
+@app.route('/users',methods=['GET','POST'])
+def user():
+    #creating variable for connection
+    cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    #executing query
+    cursor.execute("SELECT * FROM tbl_users")
+    #fetching all records from database
+    users=cursor.fetchall()
+    #returning back to subscriber.html with all records from MySQL which are stored in variable data
+    return render_template("users.html",users=users)    
 
 @app.route('/',methods=['GET','POST'])
 def dashboard():
