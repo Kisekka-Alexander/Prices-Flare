@@ -44,15 +44,14 @@ def register():
    form=RegistrationForm(request.form)
    if request.method=='POST' and form.validate():
        username= form.username.data
-       email=form.email.data
-    #    password= sha256_crypt.encrypt((str(form.password.data)))
+       email=form.email.data   
        password=generate_password_hash(form.password.data, method='sha256')
 
        cursor = mysql.connection.cursor()
        cursor.execute(''' INSERT INTO tbl_users VALUES(%s,%s,%s,%s)''',(username,email,password,""))
        mysql.connection.commit()
        cursor.close()
-       return f"Done!!"
+       return redirect(url_for('user'))
    return render_template("register.html",form=form)
 
 @app.route('/login', methods=['POST','GET'])
@@ -65,15 +64,16 @@ def login():
         # remember = True if form.remember.data('remember') else False
 
         cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute("SELECT username, password FROM tbl_users where username=%s",[username])
+        cursor.execute("SELECT COUNT(username) count, username, password FROM tbl_users where username=%s",[username])
         users=cursor.fetchall()
         for user in users:
-           dbusername=user.get("username")
            dbpassword=user.get("password")
+           dbcount=user.get("count")
 
     # check if the user actually exists
     # take the user-supplied password, hash it, and compare it to the hashed password in the database
-        if username!=dbusername or not check_password_hash(dbpassword, password):
+
+        if dbcount==0 or not check_password_hash(dbpassword, password):
             flash('Please check your login details and try again.')
             return redirect(url_for('login')) # if the user doesn't exist or password is wrong, reload the page
         return redirect(url_for('dashboard'))
