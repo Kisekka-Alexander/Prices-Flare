@@ -4,10 +4,9 @@ from flask_mysqldb import MySQL
 import MySQLdb.cursors
 import os, json, datetime
 from flask_wtf import Form
-from wtforms import StringField, validators,PasswordField,SubmitField
+from wtforms import SelectField,DateField
 from flask_bootstrap import Bootstrap
-from passlib.hash import sha256_crypt
-from Forms import RegistrationForm, DashboardParamsForm, LoginForm
+from Forms import RegistrationForm, LoginForm
 from werkzeug.security import generate_password_hash, check_password_hash
 # from MySQLdb import escape_string as thwwart
 
@@ -22,6 +21,7 @@ app.config['SECRET_KEY'] = 'secret key'
 Bootstrap(app)
  
 mysql = MySQL(app)
+
 @app.context_processor
 def override_url_for():
     return dict(url_for=dated_url_for)
@@ -114,6 +114,7 @@ def item():
     data=cursor.fetchall()
     #returning back to subscriber.html with all records from MySQL which are stored in variable data
     return render_template("items.html",items=data)
+    
 
 
 @app.route('/users',methods=['GET','POST'])
@@ -126,6 +127,11 @@ def user():
     users=cursor.fetchall()
     #returning back to subscriber.html with all records from MySQL which are stored in variable data
     return render_template("users.html",users=users)    
+
+   
+class DashboardParamsForm(Form):
+    start_date= DateField('StartDate', format='%Y-%m-%d')
+    end_date=DateField('EndDate', format='%Y-%m-%d')
 
 @app.route('/',methods=['GET','POST'])
 def dashboard():
@@ -153,6 +159,11 @@ def dashboard():
     for count in checks:
            count_label.append(count.get("count"))
 
+    ################# Get Item List Into Dropdown #########################
+    cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("select ID, Item from tbl_items")
+    itemlist=cursor.fetchall()
+
 
     return render_template("dashboard.html", 
     values=json.dumps(price_labels), 
@@ -160,5 +171,5 @@ def dashboard():
     y=json.dumps(price_labels),
     x=json.dumps(dates_labels, default = defaultconverter),
     count=json.dumps(count_label),
-    item=json.dumps(item_label), form=form)
+    item=json.dumps(item_label), form=form, itemlist=itemlist)
     

@@ -1,6 +1,6 @@
 from random import choices
 from flask_wtf import Form
-from wtforms import StringField, validators,PasswordField,SubmitField,SelectField
+from wtforms import StringField, validators,PasswordField,SubmitField
 from wtforms.fields import DateField
 
 class RegistrationForm(Form):
@@ -10,11 +10,6 @@ class RegistrationForm(Form):
                                        validators.EqualTo('confirm', message="Passwords must match")])
     confirm=PasswordField('Repeat password')
     submit = SubmitField('Submit')
-
-class DashboardParamsForm(Form):
-    items=SelectField('Item', choices=[('T','Tomatoes'),('C','Cabbages')])
-    start_date= DateField('StartDate', format='%Y-%m-%d')
-    end_date=DateField('EndDate', format='%Y-%m-%d')
 
 class LoginForm(Form):
     username=StringField('Username',[validators.DataRequired()])
