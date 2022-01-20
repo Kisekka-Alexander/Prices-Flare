@@ -48,7 +48,7 @@
 
 * [Python 3.8+](https://www.python.org/)
 * [MySql](https://www.w3schools.com/mySQl/default.asp)
-* 
+
 
 
 
@@ -68,30 +68,20 @@ For this application to run successfully, you will need to have the following so
  After successful installation and setup of the above software requirements, follow these steps to install the project using the terminal.
 1. Clone the repository to a destination directory of your choice
     ```sh
-    $ git clone https://github.com/aldookware/hrm-flare.git
+    $ git clone https://github.com/Kisekka-Alexander/Prices-Flare.git
     ```
-2. Once the project has been cloned, specifically for windows you have to convert `.sh` file in the project to dos - with a tool called dos2unix.exe <br />
-    - Download dos2unix for this [link](https://netactuate.dl.sourceforge.net/project/dos2unix/dos2unix/6.0.2/dos2unix-6.0.2-win64.zip)
-    - locate the path of the `dos2unix.exe`.
-    - run it against the `entry-point.sh`
-      ```sh
-      $ c:\Users\dos2unix-folder\dos2unix.exe <path-project>\entry-point.sh
-      ```
+2. Once the project has been cloned, you have to configure the config file in C:\wamp64\apps\phpmyadmin4.9.2 
+to connect to the online heroku db by adding the content from the dbconfig file<br />
 3. Once step 3 is successful, run the commands below 
-    ```sh 
-    $ docker-compose up -d --build
-    ```
-    - In another terminal while still within the root folder of the prokect
+
+    - In the terminal while still within the root folder of the project
       ```sh
-      $ docker-compose logs -f  # this will show you in real time what is happing to the project
+      $ env:FLASK_APP="app"
       ```
-    - Create migrations and migrate
-      ```sh 
-      $ docker-compose exec web python manage.py makemigrations
-      $ docker-compose exec web python manage.py migrate
+        ```sh
+      $ env:FLASK_ENV="development"
       ```
-    - Create super user account
-      ```sh
-      $ docker-compose exec web python manage.py createsuperuser --email <your-email> --username <your-username>
+        ```sh
+      $ flask run
       ```
-4. In a browser of your choice go to `http:localhost:8010` 
+4. In a browser of your choice go to `http:localhost:5000` 
