@@ -47,7 +47,7 @@
 ### Built With
 
 * [Python 3.8+](https://www.python.org/)
-* [JQuery 3.4.1](https://www.jquery.com/)
+* [MySql](https://www.w3schools.com/mySQl/default.asp)
 * 
 
 
