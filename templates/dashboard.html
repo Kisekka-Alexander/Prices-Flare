@@ -12,13 +12,14 @@
                             Dashboard
 
                             {{ sdate }}
+                    
                         </h3>
                         <div class="pull-left btn-toolbar">
-                            <form action="#" method="post">
+                            <form action="{{ url_for('dashboard') }}" method="post">
                                 <div class="row">
                                     <div class="col-xs-4 col-sm-3">
                                         Items
-                                    <select class="form-control"style="width:150px" name="item" >
+                                    <select class="form-control"style="width:150px" name="item_select" >
                                         {% for item in itemlist %}
                                         <option value="{{item.ID}}">{{item.Item}}</option>
                                         {% endfor %}

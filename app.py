@@ -138,8 +138,10 @@ def dashboard():
     form=DashboardParamsForm(request.form)
     startdate=form.start_date.data
     enddate=form.end_date.data
+    selecteditem = request.form.get('item_select')
+
     cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT REPLACE(FORMAT(AVG(price),0),',','') as price,DATE(date) as date FROM `tbl_prices` where DATE(date) between %s and %s group by date",(startdate,enddate))
+    cursor.execute("SELECT REPLACE(FORMAT(AVG(price),0),',','') as price,DATE(date) as date FROM `tbl_prices` where item=%s and DATE(date) between %s and %s group by date",(selecteditem,startdate,enddate))
     prices=cursor.fetchall()
     
     dates_labels=[]
@@ -171,5 +173,5 @@ def dashboard():
     y=json.dumps(price_labels),
     x=json.dumps(dates_labels, default = defaultconverter),
     count=json.dumps(count_label),
-    item=json.dumps(item_label), form=form, itemlist=itemlist)
+    item=json.dumps(item_label), form=form, itemlist=itemlist , test=selecteditem)
     
