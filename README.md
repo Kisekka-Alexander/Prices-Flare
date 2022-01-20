@@ -69,7 +69,7 @@ For this application to run successfully, you will need to have the following so
     ```
 2. Once the project has been cloned, you have to configure the config file in C:\wamp64\apps\phpmyadmin4.9.2(windows)
 to connect to the online heroku db by adding the content from the dbconfig file<br />
-3. Once step 3 is successful, run the commands below 
+3. Once step 2 is done, run the commands below 
 
     - In the terminal while still within the root folder of the project
       ```sh
