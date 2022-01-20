@@ -38,11 +38,8 @@
 
 ![Product Name Screen Shot][product-screenshot]
 
-  Our Human Resource Management Information System is an online and fully integrated HR system with a comprehensive suite of modules such as ***leave module***, ***performance module***, ***recruitment module***, ***time module***, ***payroll module***, ***training module*** and ***expense module*** for effective Human Resources Management. Its design is based on the common processes and best practices of the Human Resources functions.
-
-<p>
-    With a dynamic on-demand reporting tool, the system enables an HR department to respond faster to HR business needs. Our HRMS suites (HRMIS, TaMIS) includes online (web-based) capabilities, provides powerful easy-to-use features, fitting diverse personnel and payroll requirements in line with the objectives of any organisation.
-</p>
+  Our BeeyiMobile system is an online Price Repo for agriculture produces. It's connected to a USSD application system where stake holders in the agriculture business can register, check and post for prices for different produces in the market at anytime.
+  This web system gives an analytic view for the agriculture business in relation with the price trends of certain produces on the market and the participation of the stakeholders in the business since it has different analytic charts.
 
 ### Built With
 
@@ -70,7 +67,7 @@ For this application to run successfully, you will need to have the following so
     ```sh
     $ git clone https://github.com/Kisekka-Alexander/Prices-Flare.git
     ```
-2. Once the project has been cloned, you have to configure the config file in C:\wamp64\apps\phpmyadmin4.9.2 
+2. Once the project has been cloned, you have to configure the config file in C:\wamp64\apps\phpmyadmin4.9.2(windows)
 to connect to the online heroku db by adding the content from the dbconfig file<br />
 3. Once step 3 is successful, run the commands below 
 
