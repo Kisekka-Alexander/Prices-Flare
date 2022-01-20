@@ -140,8 +140,10 @@ def dashboard():
     enddate=form.end_date.data
     selecteditem = request.form.get('item_select')
 
+    ############### For analysing price trend one item within a selected period ####################
+
     cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT REPLACE(FORMAT(AVG(price),0),',','') as price,DATE(date) as date FROM `tbl_prices` where item=%s and DATE(date) between %s and %s group by date",(selecteditem,startdate,enddate))
+    cursor.execute("SELECT REPLACE(FORMAT(AVG(price),0),',','') as price,DATE(date) as date FROM `tbl_prices` where item=%s and DATE(date) between %s and %s group by DATE(date)",(selecteditem,startdate,enddate))
     prices=cursor.fetchall()
     
     dates_labels=[]
@@ -151,7 +153,20 @@ def dashboard():
     for date in prices:
            dates_labels.append(date.get("date"))
 
-    ################ For Checks ##################
+    ############### For analysing price trend of one item with different markets within a selected period ####################
+
+    cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("select REPLACE(FORMAT(AVG(price),0),',','') as price, B.market from tbl_prices A left join tbl_markets B ON A.Market=B.ID where item=%s and DATE(date) between %s and %s group by b.market ",(selecteditem,startdate,enddate))
+    marketprices=cursor.fetchall()
+    
+    market_label=[]
+    marketprice=[]
+    for price in marketprices:
+           marketprice.append(price.get("price"))
+    for market in marketprices:
+           market_label.append(market.get("market"))       
+
+    ################ For Number of Checks per item ##################
     cursor.execute("SELECT COUNT(a.item)count,b.item FROM tbl_prices a left join tbl_items b on a.Item=b.ID where iscomplete=1  GROUP by b.Item")
     checks=cursor.fetchall()
     count_label=[]
@@ -170,8 +185,8 @@ def dashboard():
     return render_template("dashboard.html", 
     values=json.dumps(price_labels), 
     labels=json.dumps(dates_labels, default = defaultconverter),
-    y=json.dumps(price_labels),
-    x=json.dumps(dates_labels, default = defaultconverter),
+    y=json.dumps(marketprice),
+    x=json.dumps(market_label),
     count=json.dumps(count_label),
-    item=json.dumps(item_label), form=form, itemlist=itemlist , test=selecteditem)
+    item=json.dumps(item_label), form=form, itemlist=itemlist, test=marketprice)
     
