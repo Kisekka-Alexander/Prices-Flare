@@ -1,0 +1,15 @@
+
+For Windows go to C:\wamp64\apps\phpmyadmin4.9.2\config.inc.php
+
+For ubuntu to to 
+
+
+Add the following code to the config.inc.php file to connect to the heroku server database in the first if statement.
+
+/* Heroku remote server */
+$i++;
+$cfg['Servers'][$i]['host'] = 'us-cdbr-east-04.cleardb.com'; //provide hostname
+$cfg['Servers'][$i]['extension'] = 'mysqli';
+$cfg['Servers'][$i]['user'] = 'b376dadf004332'; //user name for your remote server
+$cfg['Servers'][$i]['password'] = '85e2d67e'; //password
+$cfg['Servers'][$i]['auth_type'] = 'config'; // keep it as config 
