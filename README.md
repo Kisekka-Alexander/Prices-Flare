@@ -9,7 +9,7 @@
   <h3 align="center">AGRIC PRICES FLARE</h3>
 
   <p align="center">
-    Human Resource Management Information System
+    Agric Products Prices Repository
     <br />
     <a href="https://github.com/Kisekka-Alexander/Prices-Flare/issues">Report Bug</a>
     ·
