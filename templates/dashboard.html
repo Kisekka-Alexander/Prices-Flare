@@ -10,9 +10,7 @@
                     <div class="box-header">
                         <h3 class="col-md-12 page-header bold-flare">
                             Dashboard
-
-                            {{ sdate }}
-                            {{ test }}
+                            {{ state }}
                     
                         </h3>
                         <div class="pull-left btn-toolbar">
@@ -22,7 +20,7 @@
                                         Items
                                     <select class="form-control"style="width:150px" name="item_select" >
                                         {% for item in itemlist %}
-                                        <option value="{{item.ID}}">{{item.Item}}</option>
+                                        <option value="{{item.ID}}" {% if state==item.ID %} selected {% endif %}>{{item.Item}}</option>
                                         {% endfor %}
                                     </select>
                                     </div>
@@ -100,7 +98,7 @@
 
                                 var ctx = document.getElementById('myChart2').getContext('2d');
                                 var myChart2 = new Chart(ctx, {
-                                    type: 'line',
+                                    type: 'bar',
                                     data: {
                                         labels: x,
                                         datasets: [{

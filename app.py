@@ -188,5 +188,5 @@ def dashboard():
     y=json.dumps(marketprice),
     x=json.dumps(market_label),
     count=json.dumps(count_label),
-    item=json.dumps(item_label), form=form, itemlist=itemlist, test=marketprice)
+    item=json.dumps(item_label), form=form, itemlist=itemlist, state=selecteditem)
     
