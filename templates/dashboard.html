@@ -10,7 +10,7 @@
                     <div class="box-header">
                         <h3 class="col-md-12 page-header bold-flare">
                             Dashboard
-                            {{ state }}
+                            
                     
                         </h3>
                         <div class="pull-left btn-toolbar">
@@ -74,6 +74,7 @@
 
                                 let values = JSON.parse({{ values | tojson }});
                                 let labels = JSON.parse({{ labels | tojson }});
+                                // let item = JSON.parse({{ state | tojson }});
 
                                 var ctx = document.getElementById('myChart').getContext('2d');
                                 var myChart = new Chart(ctx, {
@@ -81,7 +82,7 @@
                                     data: {
                                         labels: labels,
                                         datasets: [{
-                                            label: 'Price Trends for Cabbages',
+                                            label: 'Average price' ,
                                             data: values,
                                             borderColor: "rgb(160, 8, 16)",
                                             backgroundColor: "rgba(75,192,192,1)",
@@ -89,7 +90,12 @@
                                         }]
                                     },
                                     options: {
-
+                                            plugins: {
+                                                title: {
+                                                    display: true,
+                                                    text: 'Price trends through out the dates',
+                                                }
+    }
 
                                     }
                                 });
@@ -102,7 +108,7 @@
                                     data: {
                                         labels: x,
                                         datasets: [{
-                                            label: 'Price Trends for Tomatoes',
+                                            label: 'Average Price',
                                             data: y,
                                             backgroundColor: "rgba(75,192,192,0.4)",
                                             borderColor: "rgba(75,192,192,1)",
@@ -111,7 +117,12 @@
                                     },
                                     options: {
 
-
+                                        plugins: {
+                                                title: {
+                                                    display: true,
+                                                    text: 'Item performance in various markets',
+                                                }
+                                            }
                                     }
                                 });
 
@@ -124,7 +135,7 @@
                                     data: {
                                         labels: item,
                                         datasets: [{
-                                            label: 'Price Checks Frequency Per Item',
+                                            label: 'Checks frequency',
                                             data: count,
                                             backgroundColor: "rgba(75,192,192,0.4)",
                                             borderColor: "rgba(75,192,192,1)",
@@ -133,7 +144,12 @@
                                     },
                                     options: {
 
-
+                                        plugins: {
+                                                title: {
+                                                    display: true,
+                                                    text: 'Checks frequency for items',
+                                                }
+                                            }
                                     }
                                 });
                             </script>
