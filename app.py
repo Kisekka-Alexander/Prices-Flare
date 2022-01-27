@@ -6,7 +6,7 @@ import os, json, datetime
 from flask_wtf import Form
 from wtforms import SelectField,DateField
 from flask_bootstrap import Bootstrap
-from Forms import RegistrationForm, LoginForm
+from Forms import RegistrationForm, LoginForm, DashboardParamsForm
 from werkzeug.security import generate_password_hash, check_password_hash
 # from MySQLdb import escape_string as thwwart
 
@@ -128,17 +128,13 @@ def user():
     #returning back to subscriber.html with all records from MySQL which are stored in variable data
     return render_template("users.html",users=users)    
 
-   
-class DashboardParamsForm(Form):
-    start_date= DateField('StartDate', format='%Y-%m-%d')
-    end_date=DateField('EndDate', format='%Y-%m-%d')
 
 @app.route('/',methods=['GET','POST'])
 def dashboard():
     form=DashboardParamsForm(request.form)
     startdate=form.start_date.data
     enddate=form.end_date.data
-    selecteditem = request.form.get('item_select')
+    selecteditem = form.item.data
 
     ############### For analysing price trend one item within a selected period ####################
 
@@ -180,6 +176,7 @@ def dashboard():
     cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("select ID, Item from tbl_items")
     itemlist=cursor.fetchall()
+    form.item.choices = [(item.get("ID"), item.get("Item")) for item in itemlist]
 
 
     return render_template("dashboard.html", 
@@ -188,5 +185,5 @@ def dashboard():
     y=json.dumps(marketprice),
     x=json.dumps(market_label),
     count=json.dumps(count_label),
-    item=json.dumps(item_label), form=form, itemlist=itemlist, state=json.dumps(selecteditem))
+    item=json.dumps(item_label), form=form, state=itemlist)
     
