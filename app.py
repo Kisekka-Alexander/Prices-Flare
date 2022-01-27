@@ -1,14 +1,12 @@
-from flask import Flask,render_template, request, redirect, flash
+from flask import Flask,render_template, request, redirect, flash, session
 from flask.helpers import url_for
 from flask_mysqldb import MySQL
 import MySQLdb.cursors
 import os, json, datetime
-from flask_wtf import Form
-from wtforms import SelectField,DateField
 from flask_bootstrap import Bootstrap
 from Forms import RegistrationForm, LoginForm, DashboardParamsForm
 from werkzeug.security import generate_password_hash, check_password_hash
-# from MySQLdb import escape_string as thwwart
+
 
 app = Flask(__name__)
 app.config['MYSQL_HOST'] = 'us-cdbr-east-04.cleardb.com'
@@ -56,12 +54,10 @@ def register():
 
 @app.route('/login', methods=['POST','GET'])
 def login():
-    # login code goes here
     form=LoginForm(request.form)
     if request.method=='POST' and form.validate():
         username = form.username.data
         password = form.password.data
-        # remember = True if form.remember.data('remember') else False
 
         cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute("SELECT COUNT(username) count, username, password FROM tbl_users where username=%s",[username])
@@ -69,6 +65,8 @@ def login():
         for user in users:
            dbpassword=user.get("password")
            dbcount=user.get("count")
+           dbuser=user.get("username")
+           
 
     # check if the user actually exists
     # take the user-supplied password, hash it, and compare it to the hashed password in the database
@@ -76,14 +74,16 @@ def login():
         if dbcount==0 or not check_password_hash(dbpassword, password):
             flash('Please check your login details and try again.')
             return redirect(url_for('login')) # if the user doesn't exist or password is wrong, reload the page
-        return redirect(url_for('dashboard'))
 
+        session['loggedin'] = True
+        session['username'] = dbuser
+        return redirect(url_for('dashboard'))
+       
     # if the above check passes, then we know the user has the right credentials
     return render_template("login.html",form=form) 
 
 @app.route('/subscribers',methods=['GET','POST'])
 def subscriber():
-    
     #creating variable for connection
     cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     #executing query
@@ -95,95 +95,98 @@ def subscriber():
 
 @app.route('/markets',methods=['GET','POST'])
 def market():
-    #creating variable for connection
-    cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    #executing query
-    cursor.execute("SELECT *,FORMAT((@row_number:=@row_number + 1),0) AS row_num  FROM tbl_markets,(SELECT @row_number:=0) AS temp")
-    #fetching all records from database
-    data=cursor.fetchall()
-    #returning back to subscriber.html with all records from MySQL which are stored in variable data
-    return render_template("markets.html",markets=data)
+
+    if 'loggedin' in session:
+        cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT *,FORMAT((@row_number:=@row_number + 1),0) AS row_num  FROM tbl_markets,(SELECT @row_number:=0) AS temp")
+        data=cursor.fetchall()
+        return render_template("markets.html",markets=data)
+
+    return redirect(url_for('login'))
 
 @app.route('/items',methods=['GET','POST'])
 def item():
-    #creating variable for connection
-    cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    #executing query
-    cursor.execute("SELECT * FROM tbl_items")
-    #fetching all records from database
-    data=cursor.fetchall()
-    #returning back to subscriber.html with all records from MySQL which are stored in variable data
-    return render_template("items.html",items=data)
+
+    if 'loggedin' in session:
+        cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT * FROM tbl_items")
+        data=cursor.fetchall()
+        return render_template("items.html",items=data)
+
+    return redirect(url_for('login'))
     
 
 
 @app.route('/users',methods=['GET','POST'])
 def user():
-    #creating variable for connection
-    cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    #executing query
-    cursor.execute("SELECT * FROM tbl_users")
-    #fetching all records from database
-    users=cursor.fetchall()
-    #returning back to subscriber.html with all records from MySQL which are stored in variable data
-    return render_template("users.html",users=users)    
+    
+    if 'loggedin' in session:
+        cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT * FROM tbl_users")
+        users=cursor.fetchall()
+        return render_template("users.html",users=users)   
+
+    return redirect(url_for('login'))
 
 
-@app.route('/',methods=['GET','POST'])
+@app.route('/dashboard',methods=['GET','POST'])
 def dashboard():
-    form=DashboardParamsForm(request.form)
-    startdate=form.start_date.data
-    enddate=form.end_date.data
-    selecteditem = form.item.data
 
-    ############### For analysing price trend one item within a selected period ####################
+    if 'loggedin' in session:
+        form=DashboardParamsForm(request.form)
+        startdate=form.start_date.data
+        enddate=form.end_date.data
+        selecteditem = form.item.data
 
-    cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT REPLACE(FORMAT(AVG(price),0),',','') as price,DATE(date) as date FROM `tbl_prices` where item=%s and DATE(date) between %s and %s group by DATE(date)",(selecteditem,startdate,enddate))
-    prices=cursor.fetchall()
+        ############### For analysing price trend one item within a selected period ####################
+
+        cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT REPLACE(FORMAT(AVG(price),0),',','') as price,DATE(date) as date FROM `tbl_prices` where item=%s and DATE(date) between %s and %s group by DATE(date)",(selecteditem,startdate,enddate))
+        prices=cursor.fetchall()
+        
+        dates_labels=[]
+        price_labels=[]
+        for price in prices:
+            price_labels.append(price.get("price"))
+        for date in prices:
+            dates_labels.append(date.get("date"))
+
+        ############### For analysing price trend of one item with different markets within a selected period ####################
+
+        cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("select REPLACE(FORMAT(AVG(price),0),',','') as price, B.market from tbl_prices A left join tbl_markets B ON A.Market=B.ID where item=%s and DATE(date) between %s and %s group by b.market ",(selecteditem,startdate,enddate))
+        marketprices=cursor.fetchall()
+        
+        market_label=[]
+        marketprice=[]
+        for price in marketprices:
+            marketprice.append(price.get("price"))
+        for market in marketprices:
+            market_label.append(market.get("market"))       
+
+        ################ For Number of Checks per item ##################
+        cursor.execute("SELECT COUNT(a.item)count,b.item FROM tbl_prices a left join tbl_items b on a.Item=b.ID where iscomplete=1  GROUP by b.Item")
+        checks=cursor.fetchall()
+        count_label=[]
+        item_label=[]
+        for item in checks:
+            item_label.append(item.get("item"))
+        for count in checks:
+            count_label.append(count.get("count"))
+
+        ################# Get Item List Into Dropdown #########################
+        cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("select ID, Item from tbl_items")
+        itemlist=cursor.fetchall()
+        form.item.choices = [(item.get("ID"), item.get("Item")) for item in itemlist]
+
+
+        return render_template("dashboard.html", 
+        values=json.dumps(price_labels), 
+        labels=json.dumps(dates_labels, default = defaultconverter),
+        y=json.dumps(marketprice),
+        x=json.dumps(market_label),
+        count=json.dumps(count_label),
+        item=json.dumps(item_label), form=form, state=itemlist)
     
-    dates_labels=[]
-    price_labels=[]
-    for price in prices:
-           price_labels.append(price.get("price"))
-    for date in prices:
-           dates_labels.append(date.get("date"))
-
-    ############### For analysing price trend of one item with different markets within a selected period ####################
-
-    cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("select REPLACE(FORMAT(AVG(price),0),',','') as price, B.market from tbl_prices A left join tbl_markets B ON A.Market=B.ID where item=%s and DATE(date) between %s and %s group by b.market ",(selecteditem,startdate,enddate))
-    marketprices=cursor.fetchall()
-    
-    market_label=[]
-    marketprice=[]
-    for price in marketprices:
-           marketprice.append(price.get("price"))
-    for market in marketprices:
-           market_label.append(market.get("market"))       
-
-    ################ For Number of Checks per item ##################
-    cursor.execute("SELECT COUNT(a.item)count,b.item FROM tbl_prices a left join tbl_items b on a.Item=b.ID where iscomplete=1  GROUP by b.Item")
-    checks=cursor.fetchall()
-    count_label=[]
-    item_label=[]
-    for item in checks:
-           item_label.append(item.get("item"))
-    for count in checks:
-           count_label.append(count.get("count"))
-
-    ################# Get Item List Into Dropdown #########################
-    cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("select ID, Item from tbl_items")
-    itemlist=cursor.fetchall()
-    form.item.choices = [(item.get("ID"), item.get("Item")) for item in itemlist]
-
-
-    return render_template("dashboard.html", 
-    values=json.dumps(price_labels), 
-    labels=json.dumps(dates_labels, default = defaultconverter),
-    y=json.dumps(marketprice),
-    x=json.dumps(market_label),
-    count=json.dumps(count_label),
-    item=json.dumps(item_label), form=form, state=itemlist)
-    
+    return redirect(url_for('login'))
