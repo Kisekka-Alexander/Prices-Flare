@@ -9,28 +9,19 @@
             <div class="col-md-12">
                 <div class="box">
                     <h3 class="col-md-12 page-header bold-flare">
-                        SetUp Item
+                        SetUp Market
                     </h3>
                     <div class="box-body">
                         <form action="" method="post" class="form" role="form">
 
                             <div class="row">
                                 <div class="form-group col-sm-4">
-                                    {{ wtf.form_field(form.itemcode, class='form-control',
-                                    placeholder='Code') }}
-                                </div>
-                                </div>
-                                <div class="row">
-                                <div class="form-group col-sm-4">
-                                    {{ wtf.form_field(form.itemname, class='form-control',
+                                    {{ wtf.form_field(form.marketname, class='form-control',
                                     placeholder='Name') }}
                                 </div>
-                                </div>
-                                <div class="row">
                                 <div class="form-group col-sm-4">
-                                    {{ wtf.form_field(form.unitofmeasure, class='form-control',
-                                    placeholder='UnitOfMeasure') }}
-                                </div>
+                                    {{ wtf.form_field(form.marketcode, class='form-control',
+                                    placeholder='Code') }}
                                 </div>
                             </div>
 

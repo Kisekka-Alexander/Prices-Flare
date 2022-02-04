@@ -4,7 +4,7 @@ from flask_mysqldb import MySQL
 import MySQLdb.cursors
 import os, json, datetime
 from flask_bootstrap import Bootstrap
-from Forms import RegistrationForm, LoginForm, DashboardParamsForm
+from Forms import RegistrationForm, LoginForm, DashboardParamsForm, AddMarketForm, AddItemForm
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
@@ -51,6 +51,36 @@ def register():
        cursor.close()
        return redirect(url_for('user'))
    return render_template("register.html",form=form)
+
+
+@app.route('/add/market', methods = ['POST', 'GET'])
+def addmarket():
+   form=AddMarketForm(request.form)
+   if request.method=='POST' and form.validate():
+       market= form.marketname.data
+       code=form.marketcode.data
+
+       cursor = mysql.connection.cursor()
+       cursor.execute(''' INSERT INTO tbl_markets VALUES(%s,%s)''',(code,market))
+       mysql.connection.commit()
+       cursor.close()
+       return redirect(url_for('market'))
+   return render_template("add_market.html",form=form)
+
+@app.route('/add/item', methods = ['POST', 'GET'])
+def additem():
+   form=AddItemForm(request.form)
+   if request.method=='POST' and form.validate():
+       item= form.itemname.data
+       code=form.itemcode.data
+       unitofmeasure=form.unitofmeasure.data
+
+       cursor = mysql.connection.cursor()
+       cursor.execute(''' INSERT INTO tbl_items VALUES(%s,%s,%s)''',(code,item,unitofmeasure))
+       mysql.connection.commit()
+       cursor.close()
+       return redirect(url_for('item'))
+   return render_template("add_item.html",form=form)
 
 @app.route('/login', methods=['POST','GET'])
 def login():

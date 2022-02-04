@@ -11,6 +11,18 @@ class RegistrationForm(Form):
     confirm=PasswordField('Repeat password')
     submit = SubmitField('Submit')
 
+
+class AddMarketForm(Form):
+    marketname=StringField('Market')
+    marketcode=StringField('Code')
+    submit = SubmitField('Submit')
+
+class AddItemForm(Form):
+    itemname=StringField('Item')
+    itemcode=StringField('Code')
+    unitofmeasure=StringField('UnitOfMeasure')
+    submit = SubmitField('Submit')
+
 class LoginForm(Form):
     username=StringField('Username',[validators.DataRequired()])
     password=PasswordField('Password',[validators.DataRequired()])
