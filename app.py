@@ -7,12 +7,15 @@ from flask_bootstrap import Bootstrap
 from Forms import RegistrationForm, LoginForm, DashboardParamsForm, AddMarketForm, AddItemForm
 from werkzeug.security import generate_password_hash, check_password_hash
 
+import pandas as pd
+import seaborn as sns
+
 
 app = Flask(__name__)
-app.config['MYSQL_HOST'] = 'us-cdbr-east-04.cleardb.com'
-app.config['MYSQL_USER'] = 'b376dadf004332'
-app.config['MYSQL_PASSWORD'] = '85e2d67e'
-app.config['MYSQL_DB'] = 'heroku_5443e697ebea265'
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'Leo@2567'
+app.config['MYSQL_DB'] = 'price_flare'
 # app.config['MYSQL_PORT'] = 3308
 
 app.config['SECRET_KEY'] = 'secret key'
@@ -46,7 +49,7 @@ def register():
        password=generate_password_hash(form.password.data, method='sha256')
 
        cursor = mysql.connection.cursor()
-       cursor.execute(''' INSERT INTO tbl_users VALUES(%s,%s,%s,%s)''',(username,email,password,""))
+       cursor.execute(''' INSERT INTO tbl_users VALUES(Null,%s,%s,%s)''',(username,email,password))
        mysql.connection.commit()
        cursor.close()
        return redirect(url_for('user'))
@@ -61,7 +64,7 @@ def addmarket():
        code=form.marketcode.data
 
        cursor = mysql.connection.cursor()
-       cursor.execute(''' INSERT INTO tbl_markets VALUES(%s,%s)''',(code,market))
+       cursor.execute(''' INSERT INTO tbl_markets VALUES(Null,%s,%s)''',(code,market))
        mysql.connection.commit()
        cursor.close()
        return redirect(url_for('market'))
@@ -76,7 +79,7 @@ def additem():
        unitofmeasure=form.unitofmeasure.data
 
        cursor = mysql.connection.cursor()
-       cursor.execute(''' INSERT INTO tbl_items VALUES(%s,%s,%s)''',(code,item,unitofmeasure))
+       cursor.execute(''' INSERT INTO tbl_items VALUES(Null,%s,%s,%s)''',(code,item,unitofmeasure))
        mysql.connection.commit()
        cursor.close()
        return redirect(url_for('item'))

@@ -20,7 +20,7 @@ class AddMarketForm(Form):
 class AddItemForm(Form):
     itemname=StringField('Item')
     itemcode=StringField('Code')
-    unitofmeasure=StringField('UnitOfMeasure')
+    unitofmeasure=StringField('Unit Of Measure')
     submit = SubmitField('Submit')
 
 class LoginForm(Form):
