@@ -187,7 +187,7 @@ def dashboard():
         ############### For analysing price trend of one item with different markets within a selected period ####################
 
         cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute("select REPLACE(FORMAT(AVG(price),0),',','') as price, B.market from tbl_prices A left join tbl_markets B ON A.Market=B.ID where item=%s and DATE(date) between %s and %s group by b.market ",(selecteditem,startdate,enddate))
+        cursor.execute("select REPLACE(FORMAT(AVG(price),0),',','') as price, B.market_name from tbl_prices A left join tbl_markets B ON A.market=B.id where item=%s and DATE(date) between %s and %s group by B.market_name ",(selecteditem,startdate,enddate))
         marketprices=cursor.fetchall()
         
         market_label=[]
@@ -195,23 +195,23 @@ def dashboard():
         for price in marketprices:
             marketprice.append(price.get("price"))
         for market in marketprices:
-            market_label.append(market.get("market"))       
+            market_label.append(market.get("market_name"))       
 
         ################ For Number of Checks per item ##################
-        cursor.execute("SELECT COUNT(a.item)count,b.item FROM tbl_prices a left join tbl_items b on a.Item=b.ID where iscomplete=1  GROUP by b.Item")
+        cursor.execute("SELECT COUNT(a.item)count,b.item_name FROM tbl_prices a left join tbl_items b on a.item=b.id GROUP by b.item_name")
         checks=cursor.fetchall()
         count_label=[]
         item_label=[]
         for item in checks:
-            item_label.append(item.get("item"))
+            item_label.append(item.get("item_name"))
         for count in checks:
             count_label.append(count.get("count"))
 
         ################# Get Item List Into Dropdown #########################
         cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute("select ID, Item from tbl_items")
+        cursor.execute("select id, item_name from tbl_items")
         itemlist=cursor.fetchall()
-        form.item.choices = [(item.get("ID"), item.get("Item")) for item in itemlist]
+        form.item.choices = [(item.get("id"), item.get("item_name")) for item in itemlist]
 
 
         return render_template("dashboard.html", 
