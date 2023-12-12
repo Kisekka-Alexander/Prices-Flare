@@ -35,123 +35,163 @@
                             </form>
                         </div>
                     </div>
-                        <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
-                            <div class="col-xs-10 col-sm-4 col-md-6">
-                                <div class="card card-style mb-2">
-                                    <div class="card-body">
-                                        <div class="chart-container" style="position: relative;">
-                                            <canvas id="myChart" width="900" height="400"></canvas>
-                                        </div>
-                                    </div>
+                                                                                        <!-- <div class="col-xs-10 col-sm-4 col-md-6">
+                                                                                            <div class="card card-style mb-2">
+                                                                                                <div class="card-body">
+                                                                                                    <div class="chart-container" style="position: relative;">
+                                                                                                        <canvas id="myChart" width="900" height="400"></canvas>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="col-xs-10 col-sm-4 col-md-6">
+                                                                                            <div class="card card-style mb-2">
+                                                                                                <div class="card-body">
+                                                                                                    <div class="chart-container" style="position: relative;">
+                                                                                                        <canvas id="myChart2" width="900" height="400"></canvas>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="col-xs-10 col-sm-4 col-md-6">
+                                                                                            <div class="card card-style mb-2">
+                                                                                                <div class="card-body">
+                                                                                                    <div class="chart-container" style="position: relative;">
+                                                                                                        <canvas id="chart_checks" width="900" height="400"></canvas>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div> -->
+                    <div class="col-xs-10 col-sm-4 col-md-6">
+                        <div class="card card-style mb-2">
+                            <div class="card-body">
+                                <div class="chart-container" style="position: relative;">
+                                    <h1>Seaborn Plot</h1>
+                                    <!-- Embed the plot as an image -->
+                                    <img src="data:image/png;base64,{{ plot_url }}" alt="Seaborn Plot">
                                 </div>
                             </div>
-                            <div class="col-xs-10 col-sm-4 col-md-6">
-                                <div class="card card-style mb-2">
-                                    <div class="card-body">
-                                        <div class="chart-container" style="position: relative;">
-                                            <canvas id="myChart2" width="900" height="400"></canvas>
-                                        </div>
-                                    </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-10 col-sm-4 col-md-6">
+                        <div class="card card-style mb-2">
+                            <div class="card-body">
+                                <div class="chart-container" style="position: relative;">
+                                    <h1>Seaborn Plot</h1>
+                                    <!-- Embed the plot as an image -->
+                                    <img src="data:image/png;base64,{{ plot_url }}" alt="Seaborn Plot">
                                 </div>
                             </div>
-
-                            <div class="col-xs-10 col-sm-4 col-md-6">
-                                <div class="card card-style mb-2">
-                                    <div class="card-body">
-                                        <div class="chart-container" style="position: relative;">
-                                            <canvas id="chart_checks" width="900" height="400"></canvas>
-                                        </div>
-                                    </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-10 col-sm-4 col-md-6">
+                        <div class="card card-style mb-2">
+                            <div class="card-body">
+                                <div class="chart-container" style="position: relative;">
+                                    <h1>Seaborn Plot</h1>
+                                    <!-- Embed the plot as an image -->
+                                    <img src="data:image/png;base64,{{ plot_url }}" alt="Seaborn Plot">
                                 </div>
                             </div>
-                            <script>
-
-                                let values = JSON.parse({{ values | tojson }});
-                                let labels = JSON.parse({{ labels | tojson }});
-                                // let item = JSON.parse({{ state | tojson }});
-
-                                var ctx = document.getElementById('myChart').getContext('2d');
-                                var myChart = new Chart(ctx, {
-                                    type: 'line',
-                                    data: {
-                                        labels: labels,
-                                        datasets: [{
-                                            label: 'Average price' ,
-                                            data: values,
-                                            borderColor: "rgb(160, 8, 16)",
-                                            backgroundColor: "rgba(75,192,192,1)",
-                                            borderWidth: 1
-                                        }]
-                                    },
-                                    options: {
-                                            plugins: {
-                                                title: {
-                                                    display: true,
-                                                    text: 'Price trends through out the dates',
-                                                }
-    }
-
-                                    }
-                                });
-                                let y = JSON.parse({{ y | tojson }});
-                                let x = JSON.parse({{ x | tojson }});
-
-                                var ctx = document.getElementById('myChart2').getContext('2d');
-                                var myChart2 = new Chart(ctx, {
-                                    type: 'bar',
-                                    data: {
-                                        labels: x,
-                                        datasets: [{
-                                            label: 'Average Price',
-                                            data: y,
-                                            backgroundColor: "rgba(75,192,192,0.4)",
-                                            borderColor: "rgba(75,192,192,1)",
-                                            borderWidth: 1
-                                        }]
-                                    },
-                                    options: {
-
-                                        plugins: {
-                                                title: {
-                                                    display: true,
-                                                    text: 'Item performance in various markets',
-                                                }
-                                            }
-                                    }
-                                });
-
-                                let count = JSON.parse({{ count | tojson }});
-                                let item = JSON.parse({{ item | tojson }});
-
-                                var ctx = document.getElementById('chart_checks').getContext('2d');
-                                var chart_checks = new Chart(ctx, {
-                                    type: 'line',
-                                    data: {
-                                        labels: item,
-                                        datasets: [{
-                                            label: 'Checks frequency',
-                                            data: count,
-                                            backgroundColor: "rgba(75,192,192,0.4)",
-                                            borderColor: "rgba(75,192,192,1)",
-                                            borderWidth: 1
-                                        }]
-                                    },
-                                    options: {
-                                        plugins: {
-                                                title: {
-                                                    display: true,
-                                                    text: 'Checks frequency for items',
-                                                }
-                                            }
-                                    }
-                                });
-                            </script>
-
-                        
-                    
+                        </div>
+                    </div>
+                    <div class="col-xs-10 col-sm-4 col-md-6">
+                        <div class="card card-style mb-2">
+                            <div class="card-body">
+                                <div class="chart-container" style="position: relative;">
+                                    <h1>Seaborn Plot</h1>
+                                    <!-- Embed the plot as an image -->
+                                    <img src="data:image/png;base64,{{ plot_url }}" alt="Seaborn Plot">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+                                                                                        <!-- <script>
+                                                                                            let values = JSON.parse({{ values | tojson }});
+                                                                                            let labels = JSON.parse({{ labels | tojson }});
+                                                                                            // let item = JSON.parse({{ state | tojson }});
+
+                                                                                            var ctx = document.getElementById('myChart').getContext('2d');
+                                                                                            var myChart = new Chart(ctx, {
+                                                                                                type: 'line',
+                                                                                                data: {
+                                                                                                    labels: labels,
+                                                                                                    datasets: [{
+                                                                                                        label: 'Average price' ,
+                                                                                                        data: values,
+                                                                                                        borderColor: "rgb(160, 8, 16)",
+                                                                                                        backgroundColor: "rgba(75,192,192,1)",
+                                                                                                        borderWidth: 1
+                                                                                                    }]
+                                                                                                },
+                                                                                                options: {
+                                                                                                        plugins: {
+                                                                                                            title: {
+                                                                                                                display: true,
+                                                                                                                text: 'Price trends through out the dates',
+                                                                                                            }
+                                                                                        }
+
+                                                                                                }
+                                                                                            });
+                                                                                            let y = JSON.parse({{ y | tojson }});
+                                                                                            let x = JSON.parse({{ x | tojson }});
+
+                                                                                            var ctx = document.getElementById('myChart2').getContext('2d');
+                                                                                            var myChart2 = new Chart(ctx, {
+                                                                                                type: 'bar',
+                                                                                                data: {
+                                                                                                    labels: x,
+                                                                                                    datasets: [{
+                                                                                                        label: 'Average Price',
+                                                                                                        data: y,
+                                                                                                        backgroundColor: "rgba(75,192,192,0.4)",
+                                                                                                        borderColor: "rgba(75,192,192,1)",
+                                                                                                        borderWidth: 1
+                                                                                                    }]
+                                                                                                },
+                                                                                                options: {
+
+                                                                                                    plugins: {
+                                                                                                            title: {
+                                                                                                                display: true,
+                                                                                                                text: 'Item performance in various markets',
+                                                                                                            }
+                                                                                                        }
+                                                                                                }
+                                                                                            });
+
+                                                                                            let count = JSON.parse({{ count | tojson }});
+                                                                                            let item = JSON.parse({{ item | tojson }});
+
+                                                                                            var ctx = document.getElementById('chart_checks').getContext('2d');
+                                                                                            var chart_checks = new Chart(ctx, {
+                                                                                                type: 'line',
+                                                                                                data: {
+                                                                                                    labels: item,
+                                                                                                    datasets: [{
+                                                                                                        label: 'Checks frequency',
+                                                                                                        data: count,
+                                                                                                        backgroundColor: "rgba(75,192,192,0.4)",
+                                                                                                        borderColor: "rgba(75,192,192,1)",
+                                                                                                        borderWidth: 1
+                                                                                                    }]
+                                                                                                },
+                                                                                                options: {
+                                                                                                    plugins: {
+                                                                                                            title: {
+                                                                                                                display: true,
+                                                                                                                text: 'Checks frequency for items',
+                                                                                                            }
+                                                                                                        }
+                                                                                                }
+                                                                                            });
+                                                                                        </script> -->
 {% endblock %}

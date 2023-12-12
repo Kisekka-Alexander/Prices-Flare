@@ -9,6 +9,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 import pandas as pd
 import seaborn as sns
+from io import BytesIO
+import base64
 
 
 app = Flask(__name__)
@@ -170,10 +172,27 @@ def dashboard():
         startdate=form.start_date.data
         enddate=form.end_date.data
         selecteditem = form.item.data
+        cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+
+        ############### Create a Seaborn Plot ####################
+        cursor.execute("SELECT item,price,date(date) date FROM tbl_prices")
+        data = cursor.fetchall()
+        data = pd.DataFrame(data)
+        x = data['date']
+        y = data['price']
+        plot = sns.scatterplot(x=x,y=y, hue='item', data=data)
+
+        # Save the plot to a bytesIO object
+        img = BytesIO()
+        plot.get_figure().savefig(img, format='png')
+        img.seek(0)
+
+        # Embed the plot in the HTML Template
+        plot_url = base64.b64encode(img.getvalue()).decode()
+
 
         ############### For analysing price trend one item within a selected period ####################
 
-        cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute("SELECT REPLACE(FORMAT(AVG(price),0),',','') as price,DATE(date) as date FROM `tbl_prices` where item=%s and DATE(date) between %s and %s group by DATE(date)",(selecteditem,startdate,enddate))
         prices=cursor.fetchall()
         
@@ -186,7 +205,6 @@ def dashboard():
 
         ############### For analysing price trend of one item with different markets within a selected period ####################
 
-        cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute("select REPLACE(FORMAT(AVG(price),0),',','') as price, B.market_name from tbl_prices A left join tbl_markets B ON A.market=B.id where item=%s and DATE(date) between %s and %s group by B.market_name ",(selecteditem,startdate,enddate))
         marketprices=cursor.fetchall()
         
@@ -208,7 +226,6 @@ def dashboard():
             count_label.append(count.get("count"))
 
         ################# Get Item List Into Dropdown #########################
-        cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute("select id, item_name from tbl_items")
         itemlist=cursor.fetchall()
         form.item.choices = [(item.get("id"), item.get("item_name")) for item in itemlist]
@@ -220,6 +237,6 @@ def dashboard():
         y=json.dumps(marketprice),
         x=json.dumps(market_label),
         count=json.dumps(count_label),
-        item=json.dumps(item_label), form=form, state=itemlist)
+        item=json.dumps(item_label), form=form, state=itemlist, plot_url=plot_url)
     
     return redirect(url_for('login'))
