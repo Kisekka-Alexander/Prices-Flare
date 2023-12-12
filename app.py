@@ -169,13 +169,13 @@ def dashboard():
 
     if 'loggedin' in session:
         form=DashboardParamsForm(request.form)
-        startdate=form.start_date.data
-        enddate=form.end_date.data
-        selecteditem = form.item.data
+        startdate=form.start_date.data if form.start_date.data else '2020-01-01'
+        enddate=form.end_date.data if form.end_date.data else '2099-12-31'
+        selecteditem = form.item.data if form.item.data else 1
         cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
 
         ############### Create a Seaborn Plot ####################
-        cursor.execute("SELECT item,price,date(date) date FROM tbl_prices")
+        cursor.execute("SELECT item,price,date(date) date FROM tbl_prices  where item=%s and DATE(date) between %s and %s",(selecteditem,startdate,enddate))
         data = cursor.fetchall()
         data = pd.DataFrame(data)
         x = data['date']
