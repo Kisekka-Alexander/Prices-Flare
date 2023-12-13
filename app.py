@@ -180,15 +180,24 @@ def dashboard():
         data = pd.DataFrame(data)
         x = data['date']
         y = data['price']
-        plot = sns.scatterplot(x=x,y=y, hue='item', data=data)
+        scatter_plot = sns.scatterplot(x=x,y=y, hue='item', data=data)
+        line_plot = sns.lineplot(data=data, x="date",y="price", hue="item", style="item", markers=True, dashes=False)
 
-        # Save the plot to a bytesIO object
-        img = BytesIO()
-        plot.get_figure().savefig(img, format='png')
-        img.seek(0)
+
+        # Save the scatter plot to a bytesIO object
+        scatter_plot_img = BytesIO()
+        scatter_plot.get_figure().savefig(scatter_plot_img, format='png')
+        scatter_plot_img.seek(0)
+
+        # save line plot to a bytesIO object
+        line_plot_img = BytesIO()
+        line_plot.get_figure().savefig(line_plot_img, format='png')
+        line_plot_img.seek(0)
 
         # Embed the plot in the HTML Template
-        plot_url = base64.b64encode(img.getvalue()).decode()
+        scatter_plot_url = base64.b64encode(scatter_plot_img.getvalue()).decode()
+        line_plot_url = base64.b64encode(line_plot_img.getvalue()).decode()
+
 
 
         ############### For analysing price trend one item within a selected period ####################
@@ -237,6 +246,9 @@ def dashboard():
         y=json.dumps(marketprice),
         x=json.dumps(market_label),
         count=json.dumps(count_label),
-        item=json.dumps(item_label), form=form, state=itemlist, plot_url=plot_url)
+        item=json.dumps(item_label), form=form, state=itemlist, 
+        scatter_plot_url=scatter_plot_url,
+        line_plot_url=line_plot_url
+        )
     
     return redirect(url_for('login'))
