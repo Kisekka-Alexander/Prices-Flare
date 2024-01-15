@@ -1,7 +1,7 @@
 from flask import Flask,render_template, request, redirect, flash, session
 from flask.helpers import url_for
 from flask_mysqldb import MySQL
-import MySQLdb.cursors
+
 import os, json, datetime
 from flask_bootstrap import Bootstrap
 from Forms import RegistrationForm, LoginForm, DashboardParamsForm, AddMarketForm, AddItemForm
@@ -14,8 +14,9 @@ import base64
 
 
 app = Flask(__name__)
+
 app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_USER'] = 'alex'
 app.config['MYSQL_PASSWORD'] = 'Leo@2567'
 app.config['MYSQL_DB'] = 'price_flare'
 # app.config['MYSQL_PORT'] = 3308
@@ -24,6 +25,11 @@ app.config['SECRET_KEY'] = 'secret key'
 Bootstrap(app)
  
 mysql = MySQL(app)
+
+try:
+    mysql.connection.ping()
+except Exception as e:
+    print(f"Error connecting to MySQL: {e}")
 
 @app.context_processor
 def override_url_for():
@@ -48,7 +54,7 @@ def register():
    if request.method=='POST' and form.validate():
        username= form.username.data
        email=form.email.data   
-       password=generate_password_hash(form.password.data, method='sha256')
+       password=generate_password_hash(form.password.data, method='pbkdf2:sha256')
 
        cursor = mysql.connection.cursor()
        cursor.execute(''' INSERT INTO tbl_users VALUES(Null,%s,%s,%s)''',(username,email,password))
@@ -94,7 +100,7 @@ def login():
         username = form.username.data
         password = form.password.data
 
-        cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor = mysql.connection.cursor()
         cursor.execute("SELECT COUNT(username) count, username, password FROM tbl_users where username=%s",[username])
         users=cursor.fetchall()
         for user in users:
@@ -119,9 +125,8 @@ def login():
 
 @app.route('/subscribers',methods=['GET','POST'])
 def subscriber():
-    #creating variable for connection
-    cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     #executing query
+    cursor = mysql.connection.cursor()
     cursor.execute("SELECT FORMAT((@row_number:=@row_number + 1),0) AS row_num, A.FirstName name,a.PhoneNumber contact, a.Location location,B.Market market, c.Item item  FROM tbl_subscribers A LEFT JOIN tbl_markets B on A.Market=B.ID left join tbl_items C ON A.Item=C.ID ,(SELECT @row_number:=0) AS temp where A.Active=1")
     #fetching all records from database
     data=cursor.fetchall()
@@ -132,7 +137,8 @@ def subscriber():
 def market():
 
     if 'loggedin' in session:
-        cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+
+        cursor = mysql.connection.cursor()
         cursor.execute("SELECT *,FORMAT((@row_number:=@row_number + 1),0) AS row_num  FROM tbl_markets,(SELECT @row_number:=0) AS temp")
         data=cursor.fetchall()
         return render_template("markets.html",markets=data)
@@ -143,7 +149,8 @@ def market():
 def item():
 
     if 'loggedin' in session:
-        cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+
+        cursor = mysql.connection.cursor()
         cursor.execute("SELECT * FROM tbl_items")
         data=cursor.fetchall()
         return render_template("items.html",items=data)
@@ -156,7 +163,8 @@ def item():
 def user():
     
     if 'loggedin' in session:
-        cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+
+        cursor = mysql.connection.cursor()
         cursor.execute("SELECT * FROM tbl_users")
         users=cursor.fetchall()
         return render_template("users.html",users=users)   
@@ -172,9 +180,10 @@ def dashboard():
         startdate=form.start_date.data if form.start_date.data else '2020-01-01'
         enddate=form.end_date.data if form.end_date.data else '2099-12-31'
         selecteditem = form.item.data if form.item.data else 1
-        cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
 
         ############### Create a Seaborn Plot ####################
+
+        cursor = mysql.connection.cursor()
         cursor.execute("SELECT item,price,date(date) date FROM tbl_prices  where item=%s and DATE(date) between %s and %s",(selecteditem,startdate,enddate))
         data = cursor.fetchall()
         data = pd.DataFrame(data)
@@ -197,7 +206,6 @@ def dashboard():
         # Embed the plot in the HTML Template
         scatter_plot_url = base64.b64encode(scatter_plot_img.getvalue()).decode()
         line_plot_url = base64.b64encode(line_plot_img.getvalue()).decode()
-
 
 
         ############### For analysing price trend one item within a selected period ####################
