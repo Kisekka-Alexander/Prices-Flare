@@ -1,6 +1,7 @@
 from flask import Flask,render_template, request, redirect, flash, session
 from flask.helpers import url_for
 from flask_mysqldb import MySQL
+from MySQLdb.cursors import DictCursor
 
 import os, json, datetime
 from flask_bootstrap import Bootstrap
@@ -56,7 +57,7 @@ def register():
        email=form.email.data   
        password=generate_password_hash(form.password.data, method='pbkdf2:sha256')
 
-       cursor = mysql.connection.cursor()
+       cursor = mysql.connection.cursor(DictCursor)
        cursor.execute(''' INSERT INTO tbl_users VALUES(Null,%s,%s,%s)''',(username,email,password))
        mysql.connection.commit()
        cursor.close()
@@ -100,7 +101,7 @@ def login():
         username = form.username.data
         password = form.password.data
 
-        cursor = mysql.connection.cursor()
+        cursor = mysql.connection.cursor(DictCursor)
         cursor.execute("SELECT COUNT(username) count, username, password FROM tbl_users where username=%s",[username])
         users=cursor.fetchall()
         for user in users:
@@ -126,7 +127,7 @@ def login():
 @app.route('/subscribers',methods=['GET','POST'])
 def subscriber():
     #executing query
-    cursor = mysql.connection.cursor()
+    cursor = mysql.connection.cursor(DictCursor)
     cursor.execute("SELECT FORMAT((@row_number:=@row_number + 1),0) AS row_num, A.FirstName name,a.PhoneNumber contact, a.Location location,B.Market market, c.Item item  FROM tbl_subscribers A LEFT JOIN tbl_markets B on A.Market=B.ID left join tbl_items C ON A.Item=C.ID ,(SELECT @row_number:=0) AS temp where A.Active=1")
     #fetching all records from database
     data=cursor.fetchall()
@@ -138,7 +139,7 @@ def market():
 
     if 'loggedin' in session:
 
-        cursor = mysql.connection.cursor()
+        cursor = mysql.connection.cursor(DictCursor)
         cursor.execute("SELECT *,FORMAT((@row_number:=@row_number + 1),0) AS row_num  FROM tbl_markets,(SELECT @row_number:=0) AS temp")
         data=cursor.fetchall()
         return render_template("markets.html",markets=data)
@@ -150,7 +151,7 @@ def item():
 
     if 'loggedin' in session:
 
-        cursor = mysql.connection.cursor()
+        cursor = mysql.connection.cursor(DictCursor)
         cursor.execute("SELECT * FROM tbl_items")
         data=cursor.fetchall()
         return render_template("items.html",items=data)
@@ -164,7 +165,7 @@ def user():
     
     if 'loggedin' in session:
 
-        cursor = mysql.connection.cursor()
+        cursor = mysql.connection.cursor(DictCursor)
         cursor.execute("SELECT * FROM tbl_users")
         users=cursor.fetchall()
         return render_template("users.html",users=users)   
@@ -183,7 +184,7 @@ def dashboard():
 
         ############### Create a Seaborn Plot ####################
 
-        cursor = mysql.connection.cursor()
+        cursor = mysql.connection.cursor(DictCursor)
         cursor.execute("SELECT item,price,date(date) date FROM tbl_prices  where item=%s and DATE(date) between %s and %s",(selecteditem,startdate,enddate))
         data = cursor.fetchall()
         data = pd.DataFrame(data)
