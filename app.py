@@ -128,7 +128,7 @@ def login():
 def subscriber():
     #executing query
     cursor = mysql.connection.cursor(DictCursor)
-    cursor.execute("SELECT FORMAT((@row_number:=@row_number + 1),0) AS row_num, A.FirstName name,a.PhoneNumber contact, a.Location location,B.Market market, c.Item item  FROM tbl_subscribers A LEFT JOIN tbl_markets B on A.Market=B.ID left join tbl_items C ON A.Item=C.ID ,(SELECT @row_number:=0) AS temp where A.Active=1")
+    cursor.execute("SELECT FORMAT((@row_number:=@row_number + 1),0) AS row_num, A.full_name name,A.phone_number contact, A.location ,B.market, C.item_name  FROM tbl_subscribers A LEFT JOIN tbl_markets B on A.market=B.id left join tbl_items C ON A.item=C.id ,(SELECT @row_number:=0) AS temp where A.active=1")
     #fetching all records from database
     data=cursor.fetchall()
     #returning back to subscriber.html with all records from MySQL which are stored in variable data
