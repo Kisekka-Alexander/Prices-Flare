@@ -223,7 +223,7 @@ def dashboard():
 
         ############### For analysing price trend of one item with different markets within a selected period ####################
 
-        cursor.execute("select REPLACE(FORMAT(AVG(price),0),',','') as price, B.market_name from tbl_prices A left join tbl_markets B ON A.market=B.id where item=%s and DATE(date) between %s and %s group by B.market_name ",(selecteditem,startdate,enddate))
+        cursor.execute("select REPLACE(FORMAT(AVG(price),0),',','') as price, B.market from tbl_prices A left join tbl_markets B ON A.market=B.id where item=%s and DATE(date) between %s and %s group by B.market ",(selecteditem,startdate,enddate))
         marketprices=cursor.fetchall()
         
         market_label=[]
