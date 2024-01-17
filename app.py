@@ -185,7 +185,7 @@ def dashboard():
         ############### Create a Seaborn Plot ####################
 
         cursor = mysql.connection.cursor(DictCursor)
-        cursor.execute("SELECT item,price,date(date) date FROM tbl_prices  where item=%s and DATE(date) between %s and %s",(selecteditem,startdate,enddate))
+        cursor.execute("SELECT item_name item,price,date(date) date FROM tbl_prices A left join tbl_items B on A.item=B.id  where item=%s and DATE(date) between %s and %s",(selecteditem,startdate,enddate))
         data = cursor.fetchall()
         data = pd.DataFrame(data)
         x = data['date']
