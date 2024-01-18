@@ -40,6 +40,10 @@
 
   Our BeeyiMobile system is an online Price Repo for agriculture produces. It's connected to a USSD application system where stake holders in the agriculture business can register, check and post for prices for different produces in the market at anytime.
   This web system gives an analytic view for the agriculture business in relation with the price trends of certain produces on the market and the participation of the stakeholders in the business since it has different analytic charts.
+  visit 
+http://35.172.114.63/dashboard
+username: admin
+password: admin
 
 ### Built With
 
