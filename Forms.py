@@ -28,6 +28,6 @@ class LoginForm(Form):
     password=PasswordField('Password',[validators.DataRequired()])
 
 class DashboardParamsForm(Form):
-    start_date= DateField('StartDate', format='%Y-%m-%d')
-    end_date=DateField('EndDate', format='%Y-%m-%d')
+    start_date= DateField('StartDate',[validators.DataRequired()] ,format='%Y-%m-%d')
+    end_date=DateField('EndDate', [validators.DataRequired()],format='%Y-%m-%d')
     item = SelectField(u'Select Item', coerce=int)

@@ -1,4 +1,4 @@
-from flask import Flask,render_template, request, redirect, flash, session
+from flask import Flask,render_template, request, redirect, flash, session,send_from_directory
 from flask.helpers import url_for
 from flask_mysqldb import MySQL
 from MySQLdb.cursors import DictCursor
@@ -13,6 +13,9 @@ import seaborn as sns
 from io import BytesIO
 import base64
 
+import matplotlib.pyplot as plt
+import nbformat
+from nbclient import NotebookClient
 
 app = Flask(__name__)
 
@@ -31,6 +34,12 @@ try:
     mysql.connection.ping()
 except Exception as e:
     print(f"Error connecting to MySQL: {e}")
+
+
+
+@app.route('/static/<path:filename>')
+def serve_static(filename):
+    return send_from_directory(os.path.join(app.root_path, 'static'), filename)
 
 @app.context_processor
 def override_url_for():
@@ -178,40 +187,53 @@ def dashboard():
 
     if 'loggedin' in session:
         form=DashboardParamsForm(request.form)
-        startdate=form.start_date.data if form.start_date.data else '2020-01-01'
-        enddate=form.end_date.data if form.end_date.data else '2099-12-31'
-        selecteditem = form.item.data if form.item.data else 1
+        start_date=form.start_date.data if form.start_date.data else '2020-01-01'
+        end_date=form.end_date.data if form.end_date.data else '2099-12-31'
+        selected_item = form.item.data if form.item.data else 1
 
-        ############### Create a Seaborn Plot ####################
-
+        # DB CONNECTION
         cursor = mysql.connection.cursor(DictCursor)
-        cursor.execute("SELECT item_name item,price,date(date) date FROM tbl_prices A left join tbl_items B on A.item=B.id  where item=%s and DATE(date) between %s and %s",(selecteditem,startdate,enddate))
+        cursor.execute("SELECT item_name item,price,DATE_FORMAT(date, '%%Y-%%m') as date FROM tbl_prices A left join tbl_items B on A.item=B.id  where item=%s and DATE(date) between %s and %s group by date",(selected_item,start_date,end_date))
         data = cursor.fetchall()
         data = pd.DataFrame(data)
-        x = data['date']
-        y = data['price']
-        scatter_plot = sns.scatterplot(x=x,y=y, hue='item', data=data)
-        line_plot = sns.lineplot(data=data, x="date",y="price", hue="item", style="item", markers=True, dashes=False)
+
+        # Specify the file path for the CSV file
+        csv_file_path = 'output.csv'
+
+        # Save the DataFrame to a CSV file
+        data.to_csv(csv_file_path, index=False)
+
+        # Load the notebook
+        with open('visualization_notebook.ipynb') as notebook_file:
+            notebook = nbformat.read(notebook_file, as_version=4)
+
+        client = NotebookClient(notebook, timeout=600, kernel_name='python3')
+        client.execute()
 
 
-        # Save the scatter plot to a bytesIO object
-        scatter_plot_img = BytesIO()
-        scatter_plot.get_figure().savefig(scatter_plot_img, format='png')
-        scatter_plot_img.seek(0)
+                            # x = data['date']
+                            # y = data['price']
+                            # scatter_plot = sns.scatterplot(x=x,y=y, hue='item', data=data)
+                            # line_plot = sns.lineplot(data=data, x="date",y="price", hue="item", style="item", markers=True, dashes=False)
 
-        # save line plot to a bytesIO object
-        line_plot_img = BytesIO()
-        line_plot.get_figure().savefig(line_plot_img, format='png')
-        line_plot_img.seek(0)
+                            # scatter_plot_img = BytesIO()
+                            # scatter_plot.get_figure().savefig(scatter_plot_img, format='jpg')
+                            # scatter_plot_img.seek(0)
 
-        # Embed the plot in the HTML Template
-        scatter_plot_url = base64.b64encode(scatter_plot_img.getvalue()).decode()
-        line_plot_url = base64.b64encode(line_plot_img.getvalue()).decode()
+                            # line_plot_img = BytesIO()
+                            # line_plot.get_figure().savefig(line_plot_img, format='png')
+                            # line_plot_img.seek(0)
+
+                            # line_plot_url = base64.b64encode(line_plot_img.getvalue()).decode()
+                            # scatter_plot_url = base64.b64encode(scatter_plot_img.getvalue()).decode()
 
 
+
+
+    
         ############### For analysing price trend one item within a selected period ####################
 
-        cursor.execute("SELECT REPLACE(FORMAT(AVG(price),0),',','') as price,DATE(date) as date FROM `tbl_prices` where item=%s and DATE(date) between %s and %s group by DATE(date)",(selecteditem,startdate,enddate))
+        cursor.execute("SELECT REPLACE(FORMAT(AVG(price),0),',','') as price,DATE(date) as date FROM `tbl_prices` where item=%s and DATE(date) between %s and %s group by DATE(date)",(selected_item,start_date,end_date))
         prices=cursor.fetchall()
         
         dates_labels=[]
@@ -223,7 +245,7 @@ def dashboard():
 
         ############### For analysing price trend of one item with different markets within a selected period ####################
 
-        cursor.execute("select REPLACE(FORMAT(AVG(price),0),',','') as price, B.market from tbl_prices A left join tbl_markets B ON A.market=B.id where item=%s and DATE(date) between %s and %s group by B.market ",(selecteditem,startdate,enddate))
+        cursor.execute("select REPLACE(FORMAT(AVG(price),0),',','') as price, B.market from tbl_prices A left join tbl_markets B ON A.market=B.id where item=%s and DATE(date) between %s and %s group by B.market ",(selected_item,start_date,end_date))
         marketprices=cursor.fetchall()
         
         market_label=[]
@@ -250,14 +272,11 @@ def dashboard():
 
 
         return render_template("dashboard.html", 
-        values=json.dumps(price_labels), 
         labels=json.dumps(dates_labels, default = defaultconverter),
         y=json.dumps(marketprice),
         x=json.dumps(market_label),
         count=json.dumps(count_label),
-        item=json.dumps(item_label), form=form, state=itemlist, 
-        scatter_plot_url=scatter_plot_url,
-        line_plot_url=line_plot_url
+        item=json.dumps(item_label), form=form, state=itemlist
         )
     
     return redirect(url_for('login'))
