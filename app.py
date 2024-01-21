@@ -189,11 +189,11 @@ def dashboard():
         form=DashboardParamsForm(request.form)
         start_date=form.start_date.data if form.start_date.data else '2020-01-01'
         end_date=form.end_date.data if form.end_date.data else '2099-12-31'
-        selected_item = form.item.data if form.item.data else 1
+        selected_item = form.item.data if form.item.data else ""
 
         # DB CONNECTION
         cursor = mysql.connection.cursor(DictCursor)
-        cursor.execute("SELECT item_name item,price,DATE_FORMAT(date, '%%Y-%%m') as date FROM tbl_prices A left join tbl_items B on A.item=B.id  where item=%s and DATE(date) between %s and %s group by date",(selected_item,start_date,end_date))
+        cursor.execute("SELECT item_name item,price,DATE_FORMAT(date, '%%Y-%%m') as date FROM tbl_prices A left join tbl_items B on A.item=B.id  where ((A.item=%s) or %s='') and DATE(date) between %s and %s",(selected_item,selected_item,start_date,end_date))
         data = cursor.fetchall()
         data = pd.DataFrame(data)
 
